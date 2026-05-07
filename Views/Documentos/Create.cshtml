@@ -1,0 +1,128 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Nuevo Documento";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/documentos.css" asp-append-version="true" />
+}
+
+@* ===== ENCABEZADO ===== *@
+<div class="mb-4">
+    <a href="/Documentos/Index" class="doc-back-link">
+        <i class="bi bi-arrow-left me-1"></i> Volver a la lista
+    </a>
+    <h1 class="page-title mt-2">Nuevo Documento</h1>
+</div>
+
+@* ===== FORMULARIO ===== *@
+<form method="post" action="#" enctype="multipart/form-data">
+    <div class="row g-4">
+
+        @* ===== COLUMNA IZQUIERDA ===== *@
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-file-earmark-plus me-2"></i> Información del Documento
+                </div>
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label fw-500">Título del documento <span class="text-danger">*</span></label>
+                        <input type="text" id="titulo" name="titulo" class="form-control" required placeholder="Ingresa el título del documento" />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label for="version" class="form-label fw-500">Número de versión</label>
+                            <input type="text" id="version" name="version" class="form-control" placeholder="ej: v1.0" />
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label for="categoria" class="form-label fw-500">Categoría</label>
+                            <select id="categoria" name="categoria" class="form-select">
+                                <option value="">Selecciona una categoría</option>
+                                <option value="calidad">Calidad</option>
+                                <option value="seguridad">Seguridad</option>
+                                <option value="rrhh">RRHH</option>
+                                <option value="operaciones">Operaciones</option>
+                                <option value="legal">Legal</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label fw-500">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control" rows="4"
+                                  placeholder="Describe brevemente el contenido y propósito del documento..."></textarea>
+                    </div>
+
+                    <div class="mb-0">
+                        <label for="tags" class="form-label fw-500">Tags / Etiquetas</label>
+                        <input type="text" id="tags" name="tags" class="form-control" placeholder="ej: ISO, calidad, norma" />
+                        <div class="form-text">Separa las etiquetas con comas.</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        @* ===== COLUMNA DERECHA ===== *@
+        <div class="col-12 col-lg-4">
+
+            @* Zona de subida de archivo *@
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-cloud-upload me-2"></i> Archivo
+                </div>
+                <div class="card-body">
+                    <label for="archivo" class="dropzone">
+                        <i class="bi bi-file-earmark-arrow-up dropzone-icon"></i>
+                        <p class="dropzone-text">Arrastra tu archivo aquí o haz clic para seleccionar</p>
+                        <p class="dropzone-hint">Formatos permitidos: PDF, DOCX, XLSX (máx. 10MB)</p>
+                        <input type="file" id="archivo" name="archivo" accept=".pdf,.docx,.xlsx" class="dropzone-input" />
+                    </label>
+                </div>
+            </div>
+
+            @* Card de Configuración *@
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-gear me-2"></i> Configuración
+                </div>
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label for="estadoInicial" class="form-label fw-500">Estado inicial</label>
+                        <select id="estadoInicial" name="estadoInicial" class="form-select">
+                            <option value="borrador" selected>Borrador</option>
+                            <option value="revision">En Revisión</option>
+                        </select>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="notificarRevisores" name="notificarRevisores" />
+                        <label class="form-check-label" for="notificarRevisores">Notificar a revisores</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="aprobacionInmediata" name="aprobacionInmediata" />
+                        <label class="form-check-label" for="aprobacionInmediata">Requiere aprobación inmediata</label>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    @* ===== BOTONES ===== *@
+    <div class="doc-form-actions mt-4">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-floppy me-1"></i> Guardar como Borrador
+        </button>
+        <a href="/Documentos/Index" class="btn btn-secondary">
+            <i class="bi bi-x-lg me-1"></i> Cancelar
+        </a>
+    </div>
+
+</form>

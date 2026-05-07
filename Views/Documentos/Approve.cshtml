@@ -1,0 +1,234 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Flujo de Aprobación";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/aprobacion.css" asp-append-version="true" />
+}
+
+@* ===== SECCIÓN 1 — ENCABEZADO ===== *@
+<div class="mb-4">
+    <a href="/Documentos/Details/1" class="doc-back-link">
+        <i class="bi bi-arrow-left me-1"></i> Volver al documento
+    </a>
+    <div class="aprobacion-header mt-2">
+        <div>
+            <h1 class="page-title mb-1">Flujo de Aprobación</h1>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="aprobacion-docname">Manual de Calidad v3.2</span>
+                <span class="badge-estado badge-en-revision">En Revisión</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ===== SECCIÓN 2 — BARRA DE PROGRESO DEL FLUJO ===== *@
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="flujo-pasos">
+
+            @* Paso 1: Borrador (completado) *@
+            <div class="flujo-paso paso-completado">
+                <div class="paso-circulo">
+                    <i class="bi bi-check-lg"></i>
+                </div>
+                <div class="paso-label">Borrador</div>
+            </div>
+
+            <div class="flujo-linea flujo-linea-completada"></div>
+
+            @* Paso 2: En Revisión (activo) *@
+            <div class="flujo-paso paso-activo">
+                <div class="paso-circulo">
+                    <i class="bi bi-circle-fill" style="font-size:0.55rem;"></i>
+                </div>
+                <div class="paso-label">En Revisión</div>
+            </div>
+
+            <div class="flujo-linea"></div>
+
+            @* Paso 3: Aprobado (pendiente) *@
+            <div class="flujo-paso paso-pendiente">
+                <div class="paso-circulo">
+                    <span>3</span>
+                </div>
+                <div class="paso-label">Aprobado</div>
+            </div>
+
+            <div class="flujo-linea"></div>
+
+            @* Paso 4: Obsoleto (pendiente) *@
+            <div class="flujo-paso paso-pendiente">
+                <div class="paso-circulo">
+                    <span>4</span>
+                </div>
+                <div class="paso-label">Obsoleto</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* ===== SECCIÓN 3 — PANEL DE DECISIÓN ===== *@
+<div class="row g-4 mb-4">
+
+    @* Columna izquierda — Información del Documento *@
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-file-earmark-text me-2"></i> Información del Documento
+            </div>
+            <div class="card-body p-0">
+                <table class="table mb-0 aprobacion-info-table">
+                    <tbody>
+                        <tr>
+                            <th>Documento</th>
+                            <td>Manual de Calidad</td>
+                        </tr>
+                        <tr>
+                            <th>Versión</th>
+                            <td>v3.2</td>
+                        </tr>
+                        <tr>
+                            <th>Autor</th>
+                            <td>
+                                <span class="user-chip-sm">JP</span> Juan Pérez
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Fecha de envío</th>
+                            <td>05/05/2025</td>
+                        </tr>
+                        <tr>
+                            <th>Categoría</th>
+                            <td>Calidad</td>
+                        </tr>
+                        <tr>
+                            <th>Revisado por</th>
+                            <td>
+                                <span class="user-chip-sm">ML</span> María López
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @* Columna derecha — Tomar Decisión *@
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-check2-square me-2"></i> Tomar Decisión
+            </div>
+            <div class="card-body">
+                <form method="post" action="#">
+
+                    @* Dropdown de nuevo estado *@
+                    <div class="mb-3">
+                        <label for="nuevoEstado" class="form-label fw-500">Cambiar estado a</label>
+                        <select id="nuevoEstado" name="nuevoEstado" class="form-select">
+                            <option value="" disabled selected>Selecciona una acción...</option>
+                            <option value="aprobado">Aprobar</option>
+                            <option value="borrador">Rechazar (volver a Borrador)</option>
+                            <option value="obsoleto">Marcar como Obsoleto</option>
+                        </select>
+                    </div>
+
+                    @* Textarea de comentarios *@
+                    <div class="mb-3">
+                        <label for="comentarios" class="form-label fw-500">Comentarios del revisor</label>
+                        <textarea id="comentarios" name="comentarios" class="form-control" rows="4"
+                                  placeholder="Escribe tus observaciones, sugerencias o motivo de rechazo..."></textarea>
+                    </div>
+
+                    @* Checklist de requisitos *@
+                    <div class="requisitos-card mb-4">
+                        <div class="requisitos-titulo">
+                            <i class="bi bi-list-check me-1"></i> Checklist de requisitos
+                        </div>
+                        <div class="requisito-item">
+                            <input type="checkbox" class="form-check-input" id="req1" name="req1" />
+                            <label class="form-check-label" for="req1">El documento cumple con la normativa vigente</label>
+                        </div>
+                        <div class="requisito-item">
+                            <input type="checkbox" class="form-check-input" id="req2" name="req2" />
+                            <label class="form-check-label" for="req2">La versión y nomenclatura son correctas</label>
+                        </div>
+                        <div class="requisito-item">
+                            <input type="checkbox" class="form-check-input" id="req3" name="req3" />
+                            <label class="form-check-label" for="req3">Fue revisado por el área correspondiente</label>
+                        </div>
+                        <div class="requisito-item">
+                            <input type="checkbox" class="form-check-input" id="req4" name="req4" />
+                            <label class="form-check-label" for="req4">Los anexos y referencias están completos</label>
+                        </div>
+                    </div>
+
+                    @* Botones *@
+                    <div class="d-flex flex-column gap-2">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-check-lg me-1"></i> Confirmar Aprobación
+                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-danger flex-grow-1">
+                                <i class="bi bi-x-lg me-1"></i> Rechazar Documento
+                            </button>
+                            <a href="/Documentos/Details/1" class="btn btn-secondary">
+                                Cancelar
+                            </a>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@* ===== SECCIÓN 4 — HISTORIAL DE CAMBIOS DE ESTADO ===== *@
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-clock-history me-2"></i> Historial de Cambios de Estado
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Usuario</th>
+                        <th>Estado anterior</th>
+                        <th>Estado nuevo</th>
+                        <th>Comentario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>01/04/2025</td>
+                        <td><span class="user-chip-sm">JP</span> Juan Pérez</td>
+                        <td><span class="text-muted">—</span></td>
+                        <td><span class="badge-estado badge-borrador">Borrador</span></td>
+                        <td>Documento creado inicialmente.</td>
+                    </tr>
+                    <tr>
+                        <td>08/04/2025</td>
+                        <td><span class="user-chip-sm">JP</span> Juan Pérez</td>
+                        <td><span class="badge-estado badge-borrador">Borrador</span></td>
+                        <td><span class="badge-estado badge-en-revision">En Revisión</span></td>
+                        <td>Enviado a revisión por el autor.</td>
+                    </tr>
+                    <tr>
+                        <td>05/05/2025</td>
+                        <td><span class="user-chip-sm">ML</span> María López</td>
+                        <td><span class="badge-estado badge-en-revision">En Revisión</span></td>
+                        <td><span class="badge-estado badge-en-revision">En Revisión</span></td>
+                        <td>Se solicitaron correcciones menores en la sección 4.2.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

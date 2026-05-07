@@ -1,0 +1,81 @@
+@{
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewData["Title"] = "Crear Cuenta";
+}
+
+@* ===== Título y subtítulo ===== *@
+<div class="mb-4 text-center">
+    <h1 class="h4 fw-bold" style="color:#1a2332;">Crear Cuenta</h1>
+    <p class="mb-0" style="font-size:0.875rem; color:#6b7280;">Completa tus datos para registrarte</p>
+</div>
+
+@* ===== Formulario de registro ===== *@
+<form method="post" action="#">
+
+    @* Nombre completo *@
+    <div class="mb-3">
+        <label for="fullName" class="form-label">Nombre completo</label>
+        <input type="text"
+               id="fullName"
+               name="fullName"
+               class="form-control"
+               placeholder="Juan Pérez"
+               autocomplete="name" />
+    </div>
+
+    @* Email *@
+    <div class="mb-3">
+        <label for="email" class="form-label">Correo electrónico</label>
+        <input type="email"
+               id="email"
+               name="email"
+               class="form-control"
+               placeholder="correo@empresa.com"
+               autocomplete="email" />
+    </div>
+
+    @* Contraseña *@
+    <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <input type="password"
+               id="password"
+               name="password"
+               class="form-control"
+               placeholder="••••••••"
+               autocomplete="new-password" />
+    </div>
+
+    @* Confirmar contraseña *@
+    <div class="mb-3">
+        <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
+        <input type="password"
+               id="confirmPassword"
+               name="confirmPassword"
+               class="form-control"
+               placeholder="••••••••"
+               autocomplete="new-password" />
+    </div>
+
+    @* Dropdown de Rol *@
+    <div class="mb-4">
+        <label for="role" class="form-label">Rol</label>
+        <select id="role" name="role" class="form-select">
+            <option value="" disabled selected>Selecciona un rol</option>
+            <option value="Operario">Operario</option>
+            <option value="Revisor">Revisor</option>
+            <option value="Admin">Admin</option>
+        </select>
+    </div>
+
+    @* Botón principal *@
+    <button type="submit" class="btn-auth">
+        Crear mi cuenta
+    </button>
+
+</form>
+
+@* Divider y link de login *@
+<hr class="auth-divider" />
+<p class="auth-link-text">
+    ¿Ya tienes cuenta? <a href="/Account/Login">Inicia sesión</a>
+</p>

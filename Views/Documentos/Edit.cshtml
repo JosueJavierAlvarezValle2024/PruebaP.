@@ -1,0 +1,139 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Editar Documento";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/documentos.css" asp-append-version="true" />
+}
+
+@* ===== ENCABEZADO ===== *@
+<div class="mb-4">
+    <a href="/Documentos/Details/1" class="doc-back-link">
+        <i class="bi bi-arrow-left me-1"></i> Volver al detalle
+    </a>
+    <h1 class="page-title mt-2">Editar Documento</h1>
+</div>
+
+@* ===== ADVERTENCIA ===== *@
+<div class="alert alert-warning d-flex align-items-center gap-2 mb-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+    <span>Editar este documento creará una nueva versión automáticamente.</span>
+</div>
+
+@* ===== FORMULARIO ===== *@
+<form method="post" action="#" enctype="multipart/form-data">
+    <div class="row g-4">
+
+        @* ===== COLUMNA IZQUIERDA ===== *@
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-pencil-square me-2"></i> Información del Documento
+                </div>
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label fw-500">Título del documento <span class="text-danger">*</span></label>
+                        <input type="text" id="titulo" name="titulo" class="form-control" required value="Manual de Calidad" />
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-sm-6">
+                            <label for="version" class="form-label fw-500">Número de versión</label>
+                            <input type="text" id="version" name="version" class="form-control" value="v3.2" />
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label for="categoria" class="form-label fw-500">Categoría</label>
+                            <select id="categoria" name="categoria" class="form-select">
+                                <option value="calidad" selected>Calidad</option>
+                                <option value="seguridad">Seguridad</option>
+                                <option value="rrhh">RRHH</option>
+                                <option value="operaciones">Operaciones</option>
+                                <option value="legal">Legal</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label fw-500">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control" rows="4">Este manual establece los lineamientos generales del sistema de gestión de calidad de la organización, conforme a los requisitos de la norma ISO 9001:2015.</textarea>
+                    </div>
+
+                    <div class="mb-0">
+                        <label for="tags" class="form-label fw-500">Tags / Etiquetas</label>
+                        <input type="text" id="tags" name="tags" class="form-control" value="ISO, calidad, norma, gestión" />
+                        <div class="form-text">Separa las etiquetas con comas.</div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        @* ===== COLUMNA DERECHA ===== *@
+        <div class="col-12 col-lg-4">
+
+            @* Zona de subida de archivo *@
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="bi bi-cloud-upload me-2"></i> Reemplazar Archivo
+                </div>
+                <div class="card-body">
+                    @* Archivo actual *@
+                    <div class="current-file mb-3">
+                        <i class="bi bi-file-earmark-pdf text-danger"></i>
+                        <span>manual_calidad_v3.2.pdf</span>
+                        <span class="text-muted" style="font-size:0.75rem;">2.4 MB</span>
+                    </div>
+                    <label for="archivo" class="dropzone dropzone-sm">
+                        <i class="bi bi-file-earmark-arrow-up dropzone-icon"></i>
+                        <p class="dropzone-text">Arrastra tu archivo aquí o haz clic para seleccionar</p>
+                        <p class="dropzone-hint">Formatos permitidos: PDF, DOCX, XLSX (máx. 10MB)</p>
+                        <input type="file" id="archivo" name="archivo" accept=".pdf,.docx,.xlsx" class="dropzone-input" />
+                    </label>
+                </div>
+            </div>
+
+            @* Card de Configuración *@
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-gear me-2"></i> Configuración
+                </div>
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label for="estadoInicial" class="form-label fw-500">Estado</label>
+                        <select id="estadoInicial" name="estadoInicial" class="form-select">
+                            <option value="borrador">Borrador</option>
+                            <option value="revision">En Revisión</option>
+                            <option value="aprobado" selected>Aprobado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input type="checkbox" class="form-check-input" id="notificarRevisores" name="notificarRevisores" checked />
+                        <label class="form-check-label" for="notificarRevisores">Notificar a revisores</label>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="aprobacionInmediata" name="aprobacionInmediata" />
+                        <label class="form-check-label" for="aprobacionInmediata">Requiere aprobación inmediata</label>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    @* ===== BOTONES ===== *@
+    <div class="doc-form-actions mt-4">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-floppy me-1"></i> Guardar Cambios
+        </button>
+        <a href="/Documentos/Details/1" class="btn btn-secondary">
+            <i class="bi bi-x-lg me-1"></i> Cancelar
+        </a>
+    </div>
+
+</form>

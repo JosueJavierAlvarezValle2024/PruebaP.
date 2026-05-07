@@ -1,0 +1,264 @@
+/* =====================================================
+   NormaDoc - Flujo de Aprobación
+   aprobacion.css
+   Depende de variables definidas en site.css
+   ===================================================== */
+
+/* ===== LINK VOLVER ===== */
+.doc-back-link {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color 0.15s;
+}
+
+.doc-back-link:hover {
+    color: var(--accent-color);
+}
+
+/* ===== ENCABEZADO ===== */
+.aprobacion-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.aprobacion-docname {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-family: var(--font-heading);
+}
+
+/* ===== FLUJO DE PASOS HORIZONTAL ===== */
+.flujo-pasos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0.5rem 0;
+    overflow-x: auto;
+}
+
+/* ===== PASO INDIVIDUAL ===== */
+.flujo-paso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.paso-circulo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: box-shadow 0.2s;
+    position: relative;
+    z-index: 1;
+}
+
+.paso-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: center;
+}
+
+/* ===== PASO COMPLETADO (verde) ===== */
+.paso-completado .paso-circulo {
+    background: #16a34a;
+    color: #ffffff;
+    border: 2px solid #16a34a;
+}
+
+.paso-completado .paso-label {
+    color: #16a34a;
+}
+
+/* ===== PASO ACTIVO (azul con sombra) ===== */
+.paso-activo .paso-circulo {
+    background: var(--accent-color);
+    color: #ffffff;
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 0 0 5px rgba(45, 108, 223, 0.18);
+}
+
+.paso-activo .paso-label {
+    color: var(--accent-color);
+}
+
+/* ===== PASO PENDIENTE (gris) ===== */
+.paso-pendiente .paso-circulo {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border: 2px solid #e2e8f0;
+}
+
+.paso-pendiente .paso-label {
+    color: var(--text-muted);
+}
+
+/* ===== LÍNEA CONECTORA ===== */
+.flujo-linea {
+    flex: 1;
+    height: 2px;
+    background: #e2e8f0;
+    min-width: 40px;
+    max-width: 120px;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 0;
+}
+
+.flujo-linea-completada {
+    background: #16a34a;
+}
+
+/* ===== TABLA DE INFORMACIÓN ===== */
+.aprobacion-info-table th {
+    width: 38%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.75rem 1.25rem;
+    background: #fafbfc;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.aprobacion-info-table td {
+    font-size: 0.875rem;
+    padding: 0.75rem 1.25rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.aprobacion-info-table tr:last-child th,
+.aprobacion-info-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== CHIP DE USUARIO PEQUEÑO ===== */
+.user-chip-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: #fff;
+    font-size: 0.58rem;
+    font-weight: 700;
+    margin-right: 0.3rem;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+/* ===== CHECKLIST DE REQUISITOS ===== */
+.requisitos-card {
+    background: #f8faff;
+    border: 1px solid #dbeafe;
+    border-radius: var(--card-radius);
+    padding: 1rem 1.1rem;
+}
+
+.requisitos-titulo {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.requisito-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #e8f0fe;
+    font-size: 0.83rem;
+    color: var(--text-secondary);
+}
+
+.requisito-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.requisito-item .form-check-input {
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.requisito-item .form-check-input:checked + .form-check-label {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.requisito-item .form-check-label {
+    cursor: pointer;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* ===== UTILIDADES ===== */
+.fw-500 { font-weight: 500; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 767.98px) {
+    .flujo-pasos {
+        justify-content: flex-start;
+        padding-bottom: 0.5rem;
+    }
+
+    .flujo-linea {
+        min-width: 24px;
+    }
+
+    .paso-circulo {
+        width: 38px;
+        height: 38px;
+        font-size: 0.9rem;
+    }
+
+    .paso-label {
+        font-size: 0.68rem;
+    }
+
+    .aprobacion-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .flujo-linea {
+        min-width: 16px;
+        max-width: 40px;
+    }
+
+    .paso-circulo {
+        width: 34px;
+        height: 34px;
+        font-size: 0.8rem;
+    }
+}

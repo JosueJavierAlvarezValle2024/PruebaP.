@@ -1,0 +1,317 @@
+/* =====================================================
+   NormaDoc - Dashboard
+   dashboard.css
+   Depende de variables definidas en site.css
+   ===================================================== */
+
+/* ===== ENCABEZADO ===== */
+.dashboard-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.35rem;
+    white-space: nowrap;
+}
+
+/* ===== KPI CARDS ===== */
+.kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--white);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+    border-left-width: 4px;
+    padding: 1.1rem 1.25rem;
+    height: 100%;
+}
+
+.kpi-blue  { border-left-color: #2d6cdf; }
+.kpi-yellow { border-left-color: #d97706; }
+.kpi-green { border-left-color: #16a34a; }
+.kpi-red   { border-left-color: #dc2626; }
+
+.kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.kpi-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.kpi-number {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+.kpi-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+    font-weight: 500;
+}
+
+.kpi-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* ===== PESTAÑAS ===== */
+.tab-section-title {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.nav-tabs .nav-link {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.6rem 1rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+    background: transparent;
+}
+
+.nav-tabs .nav-link:hover:not(.active) {
+    color: var(--text-primary);
+    border-bottom-color: var(--border-color);
+}
+
+/* ===== CHIP DE USUARIO ===== */
+.user-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: #fff;
+    font-size: 0.62rem;
+    font-weight: 700;
+    margin-right: 0.4rem;
+    flex-shrink: 0;
+}
+
+/* ===== CARDS DE REVISIÓN ===== */
+.review-card {
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    transition: box-shadow 0.15s;
+}
+
+.review-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.review-card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+}
+
+.review-doc-name {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+}
+
+.review-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.review-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.review-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* ===== BADGES DE PRIORIDAD ===== */
+.badge-prioridad {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.prioridad-alta {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.prioridad-media {
+    background: #fff8e1;
+    color: #b45309;
+}
+
+.prioridad-baja {
+    background: #e6f9f0;
+    color: #15803d;
+}
+
+/* ===== BARRAS DE PROGRESO ===== */
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+    font-weight: 500;
+}
+
+.progress-count {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* ===== ACCIONES RÁPIDAS ===== */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    height: 100%;
+}
+
+.quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.25rem 1rem;
+    border: none;
+    border-radius: var(--card-radius);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.1s;
+    font-family: var(--font-body);
+}
+
+.quick-action-btn i {
+    font-size: 1.5rem;
+}
+
+.quick-action-btn:hover {
+    filter: brightness(0.93);
+    transform: translateY(-1px);
+}
+
+.quick-action-btn:active {
+    transform: translateY(0);
+}
+
+.quick-action-blue {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.quick-action-green {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.quick-action-yellow {
+    background: #fef9c3;
+    color: #92400e;
+}
+
+.quick-action-gray {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 991.98px) {
+    .review-card-body {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .review-card-actions {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .kpi-number {
+        font-size: 1.4rem;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .review-meta {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}

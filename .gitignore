@@ -1,0 +1,28 @@
+## .gitignore for ASP.NET Core
+
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+*.rsuser
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# dotnet
+.dotnet/
+
+# Publish output
+publish/

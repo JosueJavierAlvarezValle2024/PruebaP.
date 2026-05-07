@@ -1,0 +1,56 @@
+@{
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+@* ===== Título y subtítulo ===== *@
+<div class="mb-4 text-center">
+    <h1 class="h4 fw-bold" style="color:#1a2332;">Iniciar Sesión</h1>
+    <p class="mb-0" style="font-size:0.875rem; color:#6b7280;">Bienvenido de nuevo</p>
+</div>
+
+@* ===== Formulario de login ===== *@
+<form method="post" action="#">
+
+    @* Email *@
+    <div class="mb-3">
+        <label for="email" class="form-label">Correo electrónico</label>
+        <input type="email"
+               id="email"
+               name="email"
+               class="form-control"
+               placeholder="correo@empresa.com"
+               autocomplete="email" />
+    </div>
+
+    @* Contraseña *@
+    <div class="mb-3">
+        <label for="password" class="form-label">Contraseña</label>
+        <input type="password"
+               id="password"
+               name="password"
+               class="form-control"
+               placeholder="••••••••"
+               autocomplete="current-password" />
+    </div>
+
+    @* Recordarme *@
+    <div class="mb-4 form-check">
+        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe" />
+        <label class="form-check-label" for="rememberMe" style="font-size:0.8rem; color:#374151;">
+            Recordarme
+        </label>
+    </div>
+
+    @* Botón principal *@
+    <button type="submit" class="btn-auth">
+        Ingresar al sistema
+    </button>
+
+</form>
+
+@* Divider y link de registro *@
+<hr class="auth-divider" />
+<p class="auth-link-text">
+    ¿No tienes cuenta? <a href="/Account/Register">Regístrate</a>
+</p>
