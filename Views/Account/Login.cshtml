@@ -1,3 +1,4 @@
+@model LoginViewModel
 @{
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
     ViewData["Title"] = "Iniciar Sesión";
@@ -9,35 +10,36 @@
     <p class="mb-0" style="font-size:0.875rem; color:#6b7280;">Bienvenido de nuevo</p>
 </div>
 
+@Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2" })
+
 @* ===== Formulario de login ===== *@
-<form method="post" action="#">
+<form method="post" asp-action="Login" asp-controller="Account">
+    @Html.AntiForgeryToken()
 
     @* Email *@
     <div class="mb-3">
-        <label for="email" class="form-label">Correo electrónico</label>
-        <input type="email"
-               id="email"
-               name="email"
+        <label asp-for="Email" class="form-label">Correo electrónico</label>
+        <input asp-for="Email"
                class="form-control"
                placeholder="correo@empresa.com"
                autocomplete="email" />
+        <span asp-validation-for="Email" class="text-danger" style="font-size:0.8rem;"></span>
     </div>
 
     @* Contraseña *@
     <div class="mb-3">
-        <label for="password" class="form-label">Contraseña</label>
-        <input type="password"
-               id="password"
-               name="password"
+        <label asp-for="Password" class="form-label">Contraseña</label>
+        <input asp-for="Password"
                class="form-control"
                placeholder="••••••••"
                autocomplete="current-password" />
+        <span asp-validation-for="Password" class="text-danger" style="font-size:0.8rem;"></span>
     </div>
 
     @* Recordarme *@
     <div class="mb-4 form-check">
-        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe" />
-        <label class="form-check-label" for="rememberMe" style="font-size:0.8rem; color:#374151;">
+        <input asp-for="RememberMe" class="form-check-input" />
+        <label asp-for="RememberMe" class="form-check-label" style="font-size:0.8rem; color:#374151;">
             Recordarme
         </label>
     </div>
@@ -52,5 +54,5 @@
 @* Divider y link de registro *@
 <hr class="auth-divider" />
 <p class="auth-link-text">
-    ¿No tienes cuenta? <a href="/Account/Register">Regístrate</a>
+    ¿No tienes cuenta? <a asp-action="Register" asp-controller="Account">Regístrate</a>
 </p>

@@ -1,3 +1,4 @@
+@model RegisterViewModel
 @{
     Layout = "~/Views/Shared/_AuthLayout.cshtml";
     ViewData["Title"] = "Crear Cuenta";
@@ -9,62 +10,62 @@
     <p class="mb-0" style="font-size:0.875rem; color:#6b7280;">Completa tus datos para registrarte</p>
 </div>
 
+@Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2" })
+
 @* ===== Formulario de registro ===== *@
-<form method="post" action="#">
+<form method="post" asp-action="Register" asp-controller="Account">
+    @Html.AntiForgeryToken()
 
     @* Nombre completo *@
     <div class="mb-3">
-        <label for="fullName" class="form-label">Nombre completo</label>
-        <input type="text"
-               id="fullName"
-               name="fullName"
+        <label asp-for="FullName" class="form-label">Nombre completo</label>
+        <input asp-for="FullName"
                class="form-control"
                placeholder="Juan Pérez"
                autocomplete="name" />
+        <span asp-validation-for="FullName" class="text-danger" style="font-size:0.8rem;"></span>
     </div>
 
     @* Email *@
     <div class="mb-3">
-        <label for="email" class="form-label">Correo electrónico</label>
-        <input type="email"
-               id="email"
-               name="email"
+        <label asp-for="Email" class="form-label">Correo electrónico</label>
+        <input asp-for="Email"
                class="form-control"
                placeholder="correo@empresa.com"
                autocomplete="email" />
+        <span asp-validation-for="Email" class="text-danger" style="font-size:0.8rem;"></span>
     </div>
 
     @* Contraseña *@
     <div class="mb-3">
-        <label for="password" class="form-label">Contraseña</label>
-        <input type="password"
-               id="password"
-               name="password"
+        <label asp-for="Password" class="form-label">Contraseña</label>
+        <input asp-for="Password"
                class="form-control"
                placeholder="••••••••"
                autocomplete="new-password" />
+        <span asp-validation-for="Password" class="text-danger" style="font-size:0.8rem;"></span>
     </div>
 
     @* Confirmar contraseña *@
     <div class="mb-3">
-        <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
-        <input type="password"
-               id="confirmPassword"
-               name="confirmPassword"
+        <label asp-for="ConfirmPassword" class="form-label">Confirmar contraseña</label>
+        <input asp-for="ConfirmPassword"
                class="form-control"
                placeholder="••••••••"
                autocomplete="new-password" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger" style="font-size:0.8rem;"></span>
     </div>
 
     @* Dropdown de Rol *@
     <div class="mb-4">
-        <label for="role" class="form-label">Rol</label>
-        <select id="role" name="role" class="form-select">
-            <option value="" disabled selected>Selecciona un rol</option>
+        <label asp-for="Role" class="form-label">Rol</label>
+        <select asp-for="Role" class="form-select">
+            <option value="">Selecciona un rol</option>
             <option value="Operario">Operario</option>
             <option value="Revisor">Revisor</option>
             <option value="Admin">Admin</option>
         </select>
+        <span asp-validation-for="Role" class="text-danger" style="font-size:0.8rem;"></span>
     </div>
 
     @* Botón principal *@
@@ -77,5 +78,5 @@
 @* Divider y link de login *@
 <hr class="auth-divider" />
 <p class="auth-link-text">
-    ¿Ya tienes cuenta? <a href="/Account/Login">Inicia sesión</a>
+    ¿Ya tienes cuenta? <a asp-action="Login" asp-controller="Account">Inicia sesión</a>
 </p>

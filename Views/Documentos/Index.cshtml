@@ -1,6 +1,9 @@
+@model IEnumerable<Documento>
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Gestión de Documentos";
+    int total = (int)(ViewBag.Total ?? 0);
+    int i = 1;
 }
 
 @section Styles {
@@ -11,9 +14,9 @@
 <div class="dashboard-header mb-4">
     <div>
         <h1 class="page-title">Gestión de Documentos</h1>
-        <p class="page-subtitle mb-0">128 documentos en el sistema</p>
+        <p class="page-subtitle mb-0">@total documentos en el sistema</p>
     </div>
-    <a href="/Documentos/Create" class="btn btn-primary">
+    <a asp-action="Create" asp-controller="Documentos" class="btn btn-primary">
         <i class="bi bi-plus-lg me-1"></i> Nuevo Documento
     </a>
 </div>
@@ -28,17 +31,17 @@
             </div>
             <select class="form-select doc-filter">
                 <option value="">Todos los estados</option>
-                <option value="borrador">Borrador</option>
-                <option value="revision">En Revisión</option>
-                <option value="aprobado">Aprobado</option>
-                <option value="obsoleto">Obsoleto</option>
+                <option value="Borrador">Borrador</option>
+                <option value="EnRevision">En Revisión</option>
+                <option value="Aprobado">Aprobado</option>
+                <option value="Obsoleto">Obsoleto</option>
             </select>
             <select class="form-select doc-filter">
                 <option value="">Todas las categorías</option>
-                <option value="calidad">Calidad</option>
-                <option value="seguridad">Seguridad</option>
-                <option value="rrhh">RRHH</option>
-                <option value="operaciones">Operaciones</option>
+                <option value="Calidad">Calidad</option>
+                <option value="Seguridad">Seguridad</option>
+                <option value="RRHH">RRHH</option>
+                <option value="Operaciones">Operaciones</option>
             </select>
         </div>
     </div>
@@ -62,163 +65,48 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="text-muted">001</td>
-                        <td class="doc-title-cell"><i class="bi bi-file-earmark-pdf text-danger me-2"></i>Manual de Calidad</td>
-                        <td>v3.2</td>
-                        <td><span class="badge-estado badge-aprobado">Aprobado</span></td>
-                        <td>Calidad</td>
-                        <td>06/05/2025</td>
-                        <td>Juan Pérez</td>
-                        <td><div class="doc-actions">
-                            <a href="/Documentos/Details/1" class="btn btn-primary btn-sm">Ver</a>
-                            <a href="/Documentos/Edit/1" class="btn btn-secondary btn-sm">Editar</a>
-                            <a href="/Documentos/Approve/1" class="btn btn-success btn-sm">Aprobar</a>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">002</td>
-                        <td class="doc-title-cell"><i class="bi bi-file-earmark-word text-primary me-2"></i>Procedimiento ISO-9001</td>
-                        <td>v2.4</td>
-                        <td><span class="badge-estado badge-en-revision">En Revisión</span></td>
-                        <td>ISO</td>
-                        <td>05/05/2025</td>
-                        <td>María García</td>
-                        <td><div class="doc-actions">
-                            <a href="/Documentos/Details/1" class="btn btn-primary btn-sm">Ver</a>
-                            <a href="/Documentos/Edit/1" class="btn btn-secondary btn-sm">Editar</a>
-                            <a href="/Documentos/Approve/1" class="btn btn-success btn-sm">Aprobar</a>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">003</td>
-                        <td class="doc-title-cell"><i class="bi bi-file-earmark-pdf text-danger me-2"></i>Política de Privacidad</td>
-                        <td>v1.0</td>
-                        <td><span class="badge-estado badge-borrador">Borrador</span></td>
-                        <td>Legal</td>
-                        <td>04/05/2025</td>
-                        <td>Ana López</td>
-                        <td><div class="doc-actions">
-                            <a href="/Documentos/Details/1" class="btn btn-primary btn-sm">Ver</a>
-                            <a href="/Documentos/Edit/1" class="btn btn-secondary btn-sm">Editar</a>
-                            <a href="/Documentos/Approve/1" class="btn btn-success btn-sm">Aprobar</a>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">004</td>
-                        <td class="doc-title-cell"><i class="bi bi-file-earmark-excel text-success me-2"></i>Plan de Auditoría 2025</td>
-                        <td>v1.2</td>
-                        <td><span class="badge-estado badge-en-revision">En Revisión</span></td>
-                        <td>Auditoría</td>
-                        <td>03/05/2025</td>
-                        <td>Carlos Ruiz</td>
-                        <td><div class="doc-actions">
-                            <a href="/Documentos/Details/1" class="btn btn-primary btn-sm">Ver</a>
-                            <a href="/Documentos/Edit/1" class="btn btn-secondary btn-sm">Editar</a>
-                            <a href="/Documentos/Approve/1" class="btn btn-success btn-sm">Aprobar</a>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">005</td>
-                        <td class="doc-title-cell"><i class="bi bi-file-earmark-pdf text-danger me-2"></i>Reglamento Interno</td>
-                        <td>v1.8</td>
-                        <td><span class="badge-estado badge-obsoleto">Obsoleto</span></td>
-                        <td>RRHH</td>
-                        <td>02/05/2025</td>
-                        <td>Laura Torres</td>
-                        <td><div class="doc-actions">
-                            <a href="/Documentos/Details/1" class="btn btn-primary btn-sm">Ver</a>
-                            <a href="/Documentos/Edit/1" class="btn btn-secondary btn-sm">Editar</a>
-                            <a href="/Documentos/Approve/1" class="btn btn-success btn-sm">Aprobar</a>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">006</td>
-                        <td class="doc-title-cell"><i class="bi bi-file-earmark-word text-primary me-2"></i>Política de Seguridad</td>
-                        <td>v2.0</td>
-                        <td><span class="badge-estado badge-aprobado">Aprobado</span></td>
-                        <td>Seguridad</td>
-                        <td>01/05/2025</td>
-                        <td>Pedro Mora</td>
-                        <td><div class="doc-actions">
-                            <a href="/Documentos/Details/1" class="btn btn-primary btn-sm">Ver</a>
-                            <a href="/Documentos/Edit/1" class="btn btn-secondary btn-sm">Editar</a>
-                            <a href="/Documentos/Approve/1" class="btn btn-success btn-sm">Aprobar</a>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">007</td>
-                        <td class="doc-title-cell"><i class="bi bi-file-earmark-pdf text-danger me-2"></i>Manual de Operaciones</td>
-                        <td>v4.0</td>
-                        <td><span class="badge-estado badge-aprobado">Aprobado</span></td>
-                        <td>Operaciones</td>
-                        <td>30/04/2025</td>
-                        <td>Sofía Vega</td>
-                        <td><div class="doc-actions">
-                            <a href="/Documentos/Details/1" class="btn btn-primary btn-sm">Ver</a>
-                            <a href="/Documentos/Edit/1" class="btn btn-secondary btn-sm">Editar</a>
-                            <a href="/Documentos/Approve/1" class="btn btn-success btn-sm">Aprobar</a>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">008</td>
-                        <td class="doc-title-cell"><i class="bi bi-file-earmark-excel text-success me-2"></i>Informe de Gestión Q1</td>
-                        <td>v1.0</td>
-                        <td><span class="badge-estado badge-borrador">Borrador</span></td>
-                        <td>Calidad</td>
-                        <td>29/04/2025</td>
-                        <td>Juan Pérez</td>
-                        <td><div class="doc-actions">
-                            <a href="/Documentos/Details/1" class="btn btn-primary btn-sm">Ver</a>
-                            <a href="/Documentos/Edit/1" class="btn btn-secondary btn-sm">Editar</a>
-                            <a href="/Documentos/Approve/1" class="btn btn-success btn-sm">Aprobar</a>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">009</td>
-                        <td class="doc-title-cell"><i class="bi bi-file-earmark-word text-primary me-2"></i>Protocolo de Emergencias</td>
-                        <td>v3.1</td>
-                        <td><span class="badge-estado badge-aprobado">Aprobado</span></td>
-                        <td>Seguridad</td>
-                        <td>28/04/2025</td>
-                        <td>María García</td>
-                        <td><div class="doc-actions">
-                            <a href="/Documentos/Details/1" class="btn btn-primary btn-sm">Ver</a>
-                            <a href="/Documentos/Edit/1" class="btn btn-secondary btn-sm">Editar</a>
-                            <a href="/Documentos/Approve/1" class="btn btn-success btn-sm">Aprobar</a>
-                        </div></td>
-                    </tr>
-                    <tr>
-                        <td class="text-muted">010</td>
-                        <td class="doc-title-cell"><i class="bi bi-file-earmark-pdf text-danger me-2"></i>Contrato Marco Proveedores</td>
-                        <td>v2.2</td>
-                        <td><span class="badge-estado badge-en-revision">En Revisión</span></td>
-                        <td>Legal</td>
-                        <td>27/04/2025</td>
-                        <td>Carlos Ruiz</td>
-                        <td><div class="doc-actions">
-                            <a href="/Documentos/Details/1" class="btn btn-primary btn-sm">Ver</a>
-                            <a href="/Documentos/Edit/1" class="btn btn-secondary btn-sm">Editar</a>
-                            <a href="/Documentos/Approve/1" class="btn btn-success btn-sm">Aprobar</a>
-                        </div></td>
-                    </tr>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="bi bi-folder2-open fs-3 d-block mb-2"></i>
+                                No hay documentos. <a asp-action="Create">Crea el primero.</a>
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var doc in Model)
+                    {
+                        var iconClass = doc.Extension switch {
+                            "pdf"  => "bi-file-earmark-pdf text-danger",
+                            "docx" => "bi-file-earmark-word text-primary",
+                            "xlsx" => "bi-file-earmark-excel text-success",
+                            _      => "bi-file-earmark text-secondary"
+                        };
+                        <tr>
+                            <td class="text-muted">@(i++.ToString("D3"))</td>
+                            <td class="doc-title-cell">
+                                <i class="bi @iconClass me-2"></i>@doc.Titulo
+                            </td>
+                            <td>v@doc.Version</td>
+                            <td>
+                                <span class="badge-estado @EstadoHelper.ToBadgeClass(doc.Estado)">
+                                    @EstadoHelper.ToLabel(doc.Estado)
+                                </span>
+                            </td>
+                            <td>@(doc.Categoria ?? "—")</td>
+                            <td>@doc.FechaModificacion.ToString("dd/MM/yyyy")</td>
+                            <td>@(doc.Usuario?.Nombre ?? "—")</td>
+                            <td>
+                                <div class="doc-actions">
+                                    <a asp-action="Details" asp-route-id="@doc.Id" class="btn btn-primary btn-sm">Ver</a>
+                                    <a asp-action="Edit" asp-route-id="@doc.Id" class="btn btn-secondary btn-sm">Editar</a>
+                                    <a asp-action="Approve" asp-route-id="@doc.Id" class="btn btn-success btn-sm">Aprobar</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-
-@* ===== PAGINACIÓN ===== *@
-<nav aria-label="Paginación de documentos">
-    <ul class="pagination justify-content-center">
-        <li class="page-item disabled">
-            <span class="page-link"><i class="bi bi-chevron-left"></i> Anterior</span>
-        </li>
-        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-        <li class="page-item"><a class="page-link" href="#">2</a></li>
-        <li class="page-item"><a class="page-link" href="#">3</a></li>
-        <li class="page-item">
-            <a class="page-link" href="#">Siguiente <i class="bi bi-chevron-right"></i></a>
-        </li>
-    </ul>
-</nav>

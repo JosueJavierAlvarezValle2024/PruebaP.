@@ -1,3 +1,4 @@
+@model DocumentoFormViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Editar Documento";
@@ -9,7 +10,7 @@
 
 @* ===== ENCABEZADO ===== *@
 <div class="mb-4">
-    <a href="/Documentos/Details/1" class="doc-back-link">
+    <a asp-action="Details" asp-controller="Documentos" asp-route-id="@Model.Id" class="doc-back-link">
         <i class="bi bi-arrow-left me-1"></i> Volver al detalle
     </a>
     <h1 class="page-title mt-2">Editar Documento</h1>
@@ -21,8 +22,13 @@
     <span>Editar este documento creará una nueva versión automáticamente.</span>
 </div>
 
+@Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2" })
+
 @* ===== FORMULARIO ===== *@
-<form method="post" action="#" enctype="multipart/form-data">
+<form method="post" asp-action="Edit" asp-controller="Documentos" asp-route-id="@Model.Id" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input asp-for="Id" type="hidden" />
+
     <div class="row g-4">
 
         @* ===== COLUMNA IZQUIERDA ===== *@
@@ -34,35 +40,37 @@
                 <div class="card-body">
 
                     <div class="mb-3">
-                        <label for="titulo" class="form-label fw-500">Título del documento <span class="text-danger">*</span></label>
-                        <input type="text" id="titulo" name="titulo" class="form-control" required value="Manual de Calidad" />
+                        <label asp-for="Titulo" class="form-label fw-500">Título del documento <span class="text-danger">*</span></label>
+                        <input asp-for="Titulo" class="form-control" />
+                        <span asp-validation-for="Titulo" class="text-danger" style="font-size:0.8rem;"></span>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-sm-6">
-                            <label for="version" class="form-label fw-500">Número de versión</label>
-                            <input type="text" id="version" name="version" class="form-control" value="v3.2" />
+                            <label asp-for="Version" class="form-label fw-500">Número de versión</label>
+                            <input asp-for="Version" class="form-control" />
                         </div>
                         <div class="col-12 col-sm-6">
-                            <label for="categoria" class="form-label fw-500">Categoría</label>
-                            <select id="categoria" name="categoria" class="form-select">
-                                <option value="calidad" selected>Calidad</option>
-                                <option value="seguridad">Seguridad</option>
-                                <option value="rrhh">RRHH</option>
-                                <option value="operaciones">Operaciones</option>
-                                <option value="legal">Legal</option>
+                            <label asp-for="Categoria" class="form-label fw-500">Categoría</label>
+                            <select asp-for="Categoria" class="form-select">
+                                <option value="">Sin categoría</option>
+                                <option value="Calidad">Calidad</option>
+                                <option value="Seguridad">Seguridad</option>
+                                <option value="RRHH">RRHH</option>
+                                <option value="Operaciones">Operaciones</option>
+                                <option value="Legal">Legal</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="descripcion" class="form-label fw-500">Descripción</label>
-                        <textarea id="descripcion" name="descripcion" class="form-control" rows="4">Este manual establece los lineamientos generales del sistema de gestión de calidad de la organización, conforme a los requisitos de la norma ISO 9001:2015.</textarea>
+                        <label asp-for="Descripcion" class="form-label fw-500">Descripción</label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="4"></textarea>
                     </div>
 
                     <div class="mb-0">
-                        <label for="tags" class="form-label fw-500">Tags / Etiquetas</label>
-                        <input type="text" id="tags" name="tags" class="form-control" value="ISO, calidad, norma, gestión" />
+                        <label asp-for="Tags" class="form-label fw-500">Tags / Etiquetas</label>
+                        <input asp-for="Tags" class="form-control" placeholder="ej: ISO, calidad, norma" />
                         <div class="form-text">Separa las etiquetas con comas.</div>
                     </div>
 
@@ -79,17 +87,19 @@
                     <i class="bi bi-cloud-upload me-2"></i> Reemplazar Archivo
                 </div>
                 <div class="card-body">
-                    @* Archivo actual *@
-                    <div class="current-file mb-3">
-                        <i class="bi bi-file-earmark-pdf text-danger"></i>
-                        <span>manual_calidad_v3.2.pdf</span>
-                        <span class="text-muted" style="font-size:0.75rem;">2.4 MB</span>
-                    </div>
-                    <label for="archivo" class="dropzone dropzone-sm">
+                    @if (!string.IsNullOrEmpty(Model.NombreArchivoActual))
+                    {
+                        <div class="current-file mb-3">
+                            <i class="bi bi-file-earmark text-secondary"></i>
+                            <span>@Model.NombreArchivoActual</span>
+                            <span class="text-muted" style="font-size:0.75rem;">@Model.TamanioActualKb KB</span>
+                        </div>
+                    }
+                    <label for="Archivo" class="dropzone dropzone-sm">
                         <i class="bi bi-file-earmark-arrow-up dropzone-icon"></i>
                         <p class="dropzone-text">Arrastra tu archivo aquí o haz clic para seleccionar</p>
                         <p class="dropzone-hint">Formatos permitidos: PDF, DOCX, XLSX (máx. 10MB)</p>
-                        <input type="file" id="archivo" name="archivo" accept=".pdf,.docx,.xlsx" class="dropzone-input" />
+                        <input asp-for="Archivo" accept=".pdf,.docx,.xlsx" class="dropzone-input" />
                     </label>
                 </div>
             </div>
@@ -102,16 +112,17 @@
                 <div class="card-body">
 
                     <div class="mb-3">
-                        <label for="estadoInicial" class="form-label fw-500">Estado</label>
-                        <select id="estadoInicial" name="estadoInicial" class="form-select">
+                        <label asp-for="EstadoInicial" class="form-label fw-500">Estado</label>
+                        <select asp-for="EstadoInicial" class="form-select">
                             <option value="borrador">Borrador</option>
                             <option value="revision">En Revisión</option>
-                            <option value="aprobado" selected>Aprobado</option>
+                            <option value="aprobado">Aprobado</option>
+                            <option value="obsoleto">Obsoleto</option>
                         </select>
                     </div>
 
                     <div class="form-check mb-2">
-                        <input type="checkbox" class="form-check-input" id="notificarRevisores" name="notificarRevisores" checked />
+                        <input type="checkbox" class="form-check-input" id="notificarRevisores" name="notificarRevisores" />
                         <label class="form-check-label" for="notificarRevisores">Notificar a revisores</label>
                     </div>
 
@@ -131,7 +142,7 @@
         <button type="submit" class="btn btn-primary">
             <i class="bi bi-floppy me-1"></i> Guardar Cambios
         </button>
-        <a href="/Documentos/Details/1" class="btn btn-secondary">
+        <a asp-action="Details" asp-controller="Documentos" asp-route-id="@Model.Id" class="btn btn-secondary">
             <i class="bi bi-x-lg me-1"></i> Cancelar
         </a>
     </div>

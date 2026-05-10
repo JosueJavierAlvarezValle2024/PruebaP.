@@ -1,6 +1,11 @@
+@model Documento
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Detalles del Documento";
+
+    var estados = new[] { "Borrador", "EnRevision", "Aprobado", "Obsoleto" };
+    var audCreacion  = Model.Auditorias.FirstOrDefault(a => a.Accion == "Creó");
+    var audAprobacion = Model.Auditorias.LastOrDefault(a => a.Accion == "Aprobó");
 }
 
 @section Styles {
@@ -9,21 +14,26 @@
 
 @* ===== ENCABEZADO ===== *@
 <div class="mb-4">
-    <a href="/Documentos/Index" class="doc-back-link">
+    <a asp-action="Index" asp-controller="Documentos" class="doc-back-link">
         <i class="bi bi-arrow-left me-1"></i> Volver a la lista
     </a>
     <div class="details-header mt-2">
         <div class="details-title-group">
-            <h1 class="page-title mb-1">Manual de Calidad</h1>
-            <span class="badge-estado badge-aprobado">Aprobado</span>
+            <h1 class="page-title mb-1">@Model.Titulo</h1>
+            <span class="badge-estado @EstadoHelper.ToBadgeClass(Model.Estado)">
+                @EstadoHelper.ToLabel(Model.Estado)
+            </span>
         </div>
         <div class="doc-actions">
-            <a href="/Documentos/Edit/1" class="btn btn-secondary">
+            <a asp-action="Edit" asp-controller="Documentos" asp-route-id="@Model.Id" class="btn btn-secondary">
                 <i class="bi bi-pencil me-1"></i> Editar
             </a>
-            <a href="#" class="btn btn-primary">
-                <i class="bi bi-download me-1"></i> Descargar
-            </a>
+            @if (Model.RutaArchivo != null)
+            {
+                <a asp-action="Download" asp-controller="Documentos" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="bi bi-download me-1"></i> Descargar
+                </a>
+            }
         </div>
     </div>
 </div>
@@ -42,62 +52,54 @@
             <div class="card-body p-0">
                 <table class="table mb-0 details-table">
                     <tbody>
-                        <tr>
-                            <th>Título</th>
-                            <td>Manual de Calidad</td>
-                        </tr>
-                        <tr>
-                            <th>Versión</th>
-                            <td>v3.2</td>
-                        </tr>
+                        <tr><th>Título</th><td>@Model.Titulo</td></tr>
+                        <tr><th>Versión</th><td>v@Model.Version</td></tr>
                         <tr>
                             <th>Estado</th>
-                            <td><span class="badge-estado badge-aprobado">Aprobado</span></td>
+                            <td>
+                                <span class="badge-estado @EstadoHelper.ToBadgeClass(Model.Estado)">
+                                    @EstadoHelper.ToLabel(Model.Estado)
+                                </span>
+                            </td>
                         </tr>
-                        <tr>
-                            <th>Categoría</th>
-                            <td>Calidad</td>
-                        </tr>
-                        <tr>
-                            <th>Fecha de creación</th>
-                            <td>01/04/2025</td>
-                        </tr>
-                        <tr>
-                            <th>Última modificación</th>
-                            <td>15/04/2025</td>
-                        </tr>
-                        <tr>
-                            <th>Autor</th>
-                            <td>Juan Pérez</td>
-                        </tr>
-                        <tr>
-                            <th>Tamaño del archivo</th>
-                            <td>2.4 MB</td>
-                        </tr>
-                        <tr>
-                            <th>Formato</th>
-                            <td><span class="badge bg-danger-subtle text-danger-emphasis">PDF</span></td>
-                        </tr>
+                        <tr><th>Categoría</th><td>@(Model.Categoria ?? "—")</td></tr>
+                        <tr><th>Fecha de creación</th><td>@Model.FechaCreacion.ToString("dd/MM/yyyy")</td></tr>
+                        <tr><th>Última modificación</th><td>@Model.FechaModificacion.ToString("dd/MM/yyyy")</td></tr>
+                        <tr><th>Autor</th><td>@(Model.Usuario?.Nombre ?? "—")</td></tr>
+                        @if (Model.TamanioKb > 0)
+                        {
+                            <tr><th>Tamaño del archivo</th><td>@Model.TamanioKb KB</td></tr>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Extension))
+                        {
+                            <tr>
+                                <th>Formato</th>
+                                <td>
+                                    <span class="badge bg-danger-subtle text-danger-emphasis">
+                                        @Model.Extension.ToUpper()
+                                    </span>
+                                </td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
         </div>
 
         @* Descripción *@
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="bi bi-text-left me-2"></i> Descripción
+        @if (!string.IsNullOrEmpty(Model.Descripcion))
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-text-left me-2"></i> Descripción
+                </div>
+                <div class="card-body">
+                    <p class="mb-0" style="font-size:0.9rem; color:var(--text-secondary); line-height:1.7;">
+                        @Model.Descripcion
+                    </p>
+                </div>
             </div>
-            <div class="card-body">
-                <p class="mb-0" style="font-size:0.9rem; color:var(--text-secondary); line-height:1.7;">
-                    Este manual establece los lineamientos generales del sistema de gestión de calidad
-                    de la organización, conforme a los requisitos de la norma ISO 9001:2015. Incluye
-                    el alcance del sistema, la política de calidad, los objetivos estratégicos y la
-                    descripción de los procesos clave. Es de cumplimiento obligatorio para todo el
-                    personal y aplica a todas las áreas funcionales de la empresa.
-                </p>
-            </div>
-        </div>
+        }
 
         @* Historial de Versiones *@
         <div class="card">
@@ -113,31 +115,30 @@
                                 <th>Fecha</th>
                                 <th>Autor</th>
                                 <th>Cambios</th>
-                                <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><span class="fw-600">v3.2</span> <span class="badge bg-primary-subtle text-primary ms-1" style="font-size:0.65rem;">Actual</span></td>
-                                <td>15/04/2025</td>
-                                <td>Juan Pérez</td>
-                                <td>Actualización sección 5.3 y anexos</td>
-                                <td><button type="button" class="btn btn-outline-primary btn-sm">Ver versión</button></td>
-                            </tr>
-                            <tr>
-                                <td>v3.1</td>
-                                <td>01/03/2025</td>
-                                <td>María García</td>
-                                <td>Revisión política de calidad</td>
-                                <td><button type="button" class="btn btn-outline-primary btn-sm">Ver versión</button></td>
-                            </tr>
-                            <tr>
-                                <td>v3.0</td>
-                                <td>10/01/2025</td>
-                                <td>Carlos Ruiz</td>
-                                <td>Reestructuración completa del documento</td>
-                                <td><button type="button" class="btn btn-outline-primary btn-sm">Ver versión</button></td>
-                            </tr>
+                            @if (!Model.HistorialVersiones.Any())
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3">Sin historial de versiones aún.</td>
+                                </tr>
+                            }
+                            @foreach (var h in Model.HistorialVersiones)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="fw-600">v@h.VersionNueva</span>
+                                        @if (h == Model.HistorialVersiones.First())
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary ms-1" style="font-size:0.65rem;">Actual</span>
+                                        }
+                                    </td>
+                                    <td>@h.FechaCambio.ToString("dd/MM/yyyy")</td>
+                                    <td>@(h.Usuario?.Nombre ?? "—")</td>
+                                    <td>@(h.Notas ?? $"v{h.VersionAnterior} → v{h.VersionNueva}")</td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -156,58 +157,42 @@
             </div>
             <div class="card-body">
                 <div class="approval-flow">
+                    @{
+                        int estadoIdx = Array.IndexOf(estados, Model.Estado);
+                    }
+                    @foreach (var (est, idx) in estados.Select((e, i) => (e, i)))
+                    {
+                        string stepClass;
+                        string icon;
+                        if (idx < estadoIdx)      { stepClass = "step-done";    icon = "bi-check-circle-fill"; }
+                        else if (idx == estadoIdx) { stepClass = "step-active";  icon = "bi-record-circle-fill"; }
+                        else                       { stepClass = "step-pending"; icon = "bi-circle"; }
 
-                    <div class="approval-step step-done">
-                        <div class="step-icon"><i class="bi bi-check-circle-fill"></i></div>
-                        <div class="step-info">
-                            <div class="step-name">Borrador</div>
-                            <div class="step-date">01/04/2025</div>
+                        <div class="approval-step @stepClass">
+                            <div class="step-icon"><i class="bi @icon"></i></div>
+                            <div class="step-info">
+                                <div class="step-name">@EstadoHelper.ToLabel(est)</div>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="approval-step step-done">
-                        <div class="step-icon"><i class="bi bi-check-circle-fill"></i></div>
-                        <div class="step-info">
-                            <div class="step-name">En Revisión</div>
-                            <div class="step-date">08/04/2025</div>
-                        </div>
-                    </div>
-
-                    <div class="approval-step step-active">
-                        <div class="step-icon"><i class="bi bi-record-circle-fill"></i></div>
-                        <div class="step-info">
-                            <div class="step-name">Aprobado</div>
-                            <div class="step-date">15/04/2025</div>
-                        </div>
-                    </div>
-
-                    <div class="approval-step step-pending">
-                        <div class="step-icon"><i class="bi bi-circle"></i></div>
-                        <div class="step-info">
-                            <div class="step-name">Obsoleto</div>
-                            <div class="step-date">—</div>
-                        </div>
-                    </div>
-
+                    }
                 </div>
             </div>
         </div>
 
-        @* Acciones *@
+        @* Acciones rápidas de estado *@
         <div class="card mb-3">
             <div class="card-header">
                 <i class="bi bi-lightning me-2"></i> Acciones
             </div>
             <div class="card-body d-flex flex-column gap-2">
-                <button type="button" class="btn btn-success w-100">
-                    <i class="bi bi-check2-circle me-1"></i> Aprobar Documento
-                </button>
-                <button type="button" class="btn btn-warning w-100">
-                    <i class="bi bi-send me-1"></i> Enviar a Revisión
-                </button>
-                <button type="button" class="btn btn-danger w-100">
-                    <i class="bi bi-archive me-1"></i> Marcar como Obsoleto
-                </button>
+                <a asp-action="Approve" asp-controller="Documentos" asp-route-id="@Model.Id"
+                   class="btn btn-success w-100">
+                    <i class="bi bi-check2-circle me-1"></i> Gestionar Aprobación
+                </a>
+                <a asp-action="Edit" asp-controller="Documentos" asp-route-id="@Model.Id"
+                   class="btn btn-warning w-100">
+                    <i class="bi bi-pencil me-1"></i> Editar Documento
+                </a>
             </div>
         </div>
 
@@ -219,20 +204,23 @@
             <div class="card-body">
                 <div class="audit-row">
                     <span class="audit-label">Creado por</span>
-                    <span class="audit-value">Juan Pérez</span>
+                    <span class="audit-value">@(audCreacion?.Usuario?.Nombre ?? Model.Usuario?.Nombre ?? "—")</span>
                 </div>
                 <div class="audit-row">
                     <span class="audit-label">Fecha de creación</span>
-                    <span class="audit-value">01/04/2025</span>
+                    <span class="audit-value">@Model.FechaCreacion.ToString("dd/MM/yyyy")</span>
                 </div>
-                <div class="audit-row">
-                    <span class="audit-label">Aprobado por</span>
-                    <span class="audit-value">María López</span>
-                </div>
-                <div class="audit-row">
-                    <span class="audit-label">Fecha de aprobación</span>
-                    <span class="audit-value">15/04/2025</span>
-                </div>
+                @if (audAprobacion != null)
+                {
+                    <div class="audit-row">
+                        <span class="audit-label">Aprobado por</span>
+                        <span class="audit-value">@(audAprobacion.Usuario?.Nombre ?? "—")</span>
+                    </div>
+                    <div class="audit-row">
+                        <span class="audit-label">Fecha de aprobación</span>
+                        <span class="audit-value">@audAprobacion.Fecha.ToString("dd/MM/yyyy")</span>
+                    </div>
+                }
             </div>
         </div>
 

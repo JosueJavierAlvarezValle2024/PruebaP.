@@ -26,3 +26,6 @@ artifacts/
 
 # Publish output
 publish/
+
+# Archivos subidos por usuarios (no se versionan)
+wwwroot/uploads/
