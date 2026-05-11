@@ -17,6 +17,7 @@ public class DashboardViewModel
 
     // Tabs
     public List<Auditoria> ActividadReciente { get; set; } = [];
+    public List<Documento> DocumentosRecientes { get; set; } = [];
     public List<Documento> PendientesRevision { get; set; } = [];
     public List<Documento> DocumentosVigentes { get; set; } = [];
 }

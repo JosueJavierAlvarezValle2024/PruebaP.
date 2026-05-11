@@ -1,99 +1,46 @@
-Estoy trabajando en NormaDoc, un Sistema de Gestión Documental en ASP.NET Core MVC 
-10 con C# y SQL Server. Ya tengo el frontend completo (vistas .cshtml y CSS).
+Continuamos con NormaDoc. Este es el último paso del Módulo .NET.
+Los operarios solo deben consultar documentos aprobados, no administrarlos.
 
-TAREA DE ESTE PROMPT: Configurar Entity Framework Core y crear los modelos 
-que representan las tablas de SQL Server. Solo esto, sin tocar las vistas.
-
-════════════════════════════════════════
-PASO 1 — Paquetes NuGet necesarios
-════════════════════════════════════════
-Dime exactamente estos comandos para ejecutar en la Consola del Administrador de Paquetes:
-- Microsoft.EntityFrameworkCore.SqlServer (versión compatible con .NET 10)
-- Microsoft.EntityFrameworkCore.Tools
-- Microsoft.AspNetCore.Identity.EntityFrameworkCore
+TAREA: Crear una vista simple de consulta para el rol Operario dentro del 
+módulo .NET, con un enlace al Módulo PHP para consulta pública completa.
 
 ════════════════════════════════════════
-PASO 2 — Modelos (carpeta Models/)
+Controllers/ConsultaController.cs
 ════════════════════════════════════════
-Crea estos archivos de modelos C#:
 
-Models/Usuario.cs
-- Hereda de IdentityUser (para usar el sistema de login de .NET)
-- Propiedades adicionales: Nombre (string), Rol (string), FechaCreacion (DateTime)
-- Roles posibles como constantes: "Admin", "Revisor", "Operario"
+[GET] Index()
+  → [Authorize(Roles = "Operario")]
+  → Obtiene solo documentos donde Estado == "Aprobado"
+  → Ordena por FechaModificacion descendente
+  → Soporta búsqueda por parámetro q (string):
+    Si q no es null: filtrar por Titulo.Contains(q)
+  → Pasa los resultados a la vista
 
-Models/Documento.cs
-- Id (int, PK)
-- Titulo (string, requerido, max 200 chars)
-- Version (string, ej: "1.0", "2.3")
-- Estado (string): "Borrador" | "EnRevision" | "Aprobado" | "Obsoleto"
-- FechaCreacion (DateTime)
-- FechaModificacion (DateTime)
-- RutaArchivo (string) — ruta física donde se guardó el archivo subido
-- NombreArchivoOriginal (string)
-- Extension (string) — "pdf", "docx", etc.
-- TamanioKb (double)
-- UsuarioId (string, FK a Usuario)
-- Propiedad de navegación: Usuario
-
-Models/HistorialVersion.cs
-- Id (int, PK)
-- DocumentoId (int, FK)
-- VersionAnterior (string)
-- VersionNueva (string)
-- FechaCambio (DateTime)
-- UsuarioId (string, FK) — quién hizo el cambio
-- Propiedades de navegación: Documento, Usuario
-
-Models/Auditoria.cs
-- Id (int, PK)
-- DocumentoId (int, FK)
-- UsuarioId (string, FK)
-- Accion (string) — "Creó", "Editó", "Aprobó", "Rechazó", "Descargó"
-- Fecha (DateTime)
-- Detalle (string) — descripción adicional
-- Propiedades de navegación: Documento, Usuario
+[GET] Download(int id)
+  → [Authorize(Roles = "Operario")]
+  → Igual que el Download del DocumentosController
+  → Registra en Auditoria: Accion = "Descargó" con UsuarioId del operario
 
 ════════════════════════════════════════
-PASO 3 — DbContext (Data/ApplicationDbContext.cs)
+Views/Consulta/Index.cshtml
 ════════════════════════════════════════
-- Hereda de IdentityDbContext<Usuario>
-- DbSet para: Documentos, HistorialVersiones, Auditorias
-- En OnModelCreating:
-  * Llama base.OnModelCreating(builder)
-  * Índice único en Documento: Titulo + Version
-  * Valor por defecto de FechaCreacion: DateTime.UtcNow
-  * Valor por defecto de Auditoria.Fecha: DateTime.UtcNow
+Crear esta vista nueva (diseño consistente con el _Layout.cshtml existente):
 
-════════════════════════════════════════
-PASO 4 — appsettings.json
-════════════════════════════════════════
-Agrega la cadena de conexión:
-"ConnectionStrings": {
-  "DefaultConnection": "Server=localhost;Database=NormaDocDB;Trusted_Connection=True;TrustServerCertificate=True;"
+- Título: "Documentos Vigentes"
+- Barra de búsqueda simple (form GET con campo q)
+- Tabla con columnas: Título | Versión | Fecha Aprobación | Extensión | Acción
+- Columna Acción: botón "Descargar" que llame a Download(id)
+- Si no hay documentos aprobados: mensaje "No hay documentos vigentes disponibles"
+- Enlace al módulo PHP: "Ver portal de consulta pública →" 
+  (la URL viene de appsettings: "ModuloConsulta:Url")
+- Diseño: usar las mismas clases CSS ya definidas en site.css (cards, tabla, badges)
+
+En appsettings.json agregar:
+"ModuloConsulta": {
+  "Url": "http://localhost:8080"
 }
-(Si usa Docker más adelante, la cambiaremos por variables de entorno)
-
-════════════════════════════════════════
-PASO 5 — Program.cs
-════════════════════════════════════════
-Agrega los servicios necesarios:
-- builder.Services.AddDbContext<ApplicationDbContext>(...)
-- builder.Services.AddIdentity<Usuario, IdentityRole>(options => {
-    options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 6;
-  }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders()
-- builder.Services.AddControllersWithViews()
-- app.UseAuthentication() ANTES de app.UseAuthorization()
-
-════════════════════════════════════════
-PASO 6 — Migración inicial
-════════════════════════════════════════
-Dame los comandos exactos para:
-1. Crear la primera migración: Add-Migration InitialCreate
-2. Aplicarla a la base de datos: Update-Database
 
 RESTRICCIONES:
-- NO modificar las vistas .cshtml existentes
-- NO crear controladores todavía
-- Solo modelos, DbContext y configuración
+- El diseño debe ser consistente con el _Layout.cshtml existente
+- NO permitir acceso a Admin ni Revisor a este controlador
+- El enlace al módulo PHP solo es un <a href>, no requiere autenticación especial

@@ -155,6 +155,47 @@
             <a asp-action="Index" asp-controller="Documentos" class="btn btn-primary btn-sm">
                 <i class="bi bi-folder2-open me-1"></i> Ver todos los documentos
             </a>
+
+            <h6 class="tab-section-title mt-4">Documentos Recientes</h6>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Versión</th>
+                            <th>Estado</th>
+                            <th>Autor</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.DocumentosRecientes.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">Sin documentos registrados.</td>
+                            </tr>
+                        }
+                        @foreach (var doc in Model.DocumentosRecientes)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-action="Details" asp-controller="Documentos" asp-route-id="@doc.Id">
+                                        @doc.Titulo
+                                    </a>
+                                </td>
+                                <td>v@doc.Version</td>
+                                <td>
+                                    <span class="badge-estado @EstadoHelper.ToBadgeClass(doc.Estado)">
+                                        @EstadoHelper.ToLabel(doc.Estado)
+                                    </span>
+                                </td>
+                                <td>@(doc.Usuario?.Nombre ?? "—")</td>
+                                <td>@doc.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         @* --- Pestaña Revisor: Pendientes --- *@

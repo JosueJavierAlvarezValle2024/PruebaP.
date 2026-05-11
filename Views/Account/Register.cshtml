@@ -7,7 +7,7 @@
 @* ===== Título y subtítulo ===== *@
 <div class="mb-4 text-center">
     <h1 class="h4 fw-bold" style="color:#1a2332;">Crear Cuenta</h1>
-    <p class="mb-0" style="font-size:0.875rem; color:#6b7280;">Completa tus datos para registrarte</p>
+    <p class="mb-0" style="font-size:0.875rem; color:#6b7280;">Registra un nuevo usuario en el sistema</p>
 </div>
 
 @Html.ValidationSummary(true, "", new { @class = "alert alert-danger py-2" })
@@ -18,12 +18,12 @@
 
     @* Nombre completo *@
     <div class="mb-3">
-        <label asp-for="FullName" class="form-label">Nombre completo</label>
-        <input asp-for="FullName"
+        <label asp-for="Nombre" class="form-label">Nombre completo</label>
+        <input asp-for="Nombre"
                class="form-control"
                placeholder="Juan Pérez"
                autocomplete="name" />
-        <span asp-validation-for="FullName" class="text-danger" style="font-size:0.8rem;"></span>
+        <span asp-validation-for="Nombre" class="text-danger" style="font-size:0.8rem;"></span>
     </div>
 
     @* Email *@
@@ -58,25 +58,25 @@
 
     @* Dropdown de Rol *@
     <div class="mb-4">
-        <label asp-for="Role" class="form-label">Rol</label>
-        <select asp-for="Role" class="form-select">
+        <label asp-for="Rol" class="form-label">Rol</label>
+        <select asp-for="Rol" class="form-select">
             <option value="">Selecciona un rol</option>
             <option value="Operario">Operario</option>
             <option value="Revisor">Revisor</option>
             <option value="Admin">Admin</option>
         </select>
-        <span asp-validation-for="Role" class="text-danger" style="font-size:0.8rem;"></span>
+        <span asp-validation-for="Rol" class="text-danger" style="font-size:0.8rem;"></span>
     </div>
 
     @* Botón principal *@
     <button type="submit" class="btn-auth">
-        Crear mi cuenta
+        Crear usuario
     </button>
 
 </form>
 
-@* Divider y link de login *@
+@* Divider y link de dashboard *@
 <hr class="auth-divider" />
 <p class="auth-link-text">
-    ¿Ya tienes cuenta? <a asp-action="Login" asp-controller="Account">Inicia sesión</a>
+    <a asp-action="Index" asp-controller="Usuarios"><i class="bi bi-arrow-left me-1"></i>Volver al listado de usuarios</a>
 </p>

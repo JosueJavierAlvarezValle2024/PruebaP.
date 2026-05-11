@@ -4,8 +4,8 @@ namespace Prueba3._0.ViewModels;
 
 public class RegisterViewModel
 {
-    [Required]
-    public string FullName { get; set; } = string.Empty;
+    [Required, MaxLength(100)]
+    public string Nombre { get; set; } = string.Empty;
 
     [Required, EmailAddress]
     public string Email { get; set; } = string.Empty;
@@ -17,5 +17,5 @@ public class RegisterViewModel
     public string ConfirmPassword { get; set; } = string.Empty;
 
     [Required]
-    public string Role { get; set; } = string.Empty;
+    public string Rol { get; set; } = string.Empty;
 }

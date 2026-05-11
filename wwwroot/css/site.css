@@ -332,6 +332,15 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0.85;
 }
 
+/* Botón de sidebar que actúa como link (ej: Cerrar sesión) */
+.btn-link-sidebar {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
 /* ===== FOOTER ===== */
 #main-footer {
     background: var(--white);

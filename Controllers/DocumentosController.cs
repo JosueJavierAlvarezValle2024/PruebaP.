@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Prueba3._0.Data;
 using Prueba3._0.Helpers;
 using Prueba3._0.Models;
+using Prueba3._0.Services;
 using Prueba3._0.ViewModels;
 
 namespace Prueba3._0.Controllers;
@@ -15,17 +16,24 @@ public class DocumentosController : Controller
     private readonly ApplicationDbContext _context;
     private readonly UserManager<Usuario> _userManager;
     private readonly IWebHostEnvironment _env;
+    private readonly BusquedaApiService _busqueda;
+
+    private static readonly string[] _extensionesPermitidas = [".pdf", ".docx", ".doc", ".xlsx"];
 
     public DocumentosController(ApplicationDbContext context,
         UserManager<Usuario> userManager,
-        IWebHostEnvironment env)
+        IWebHostEnvironment env,
+        BusquedaApiService busqueda)
     {
         _context = context;
         _userManager = userManager;
         _env = env;
+        _busqueda = busqueda;
     }
 
     // GET /Documentos
+    [HttpGet]
+    [Authorize(Roles = "Admin,Revisor")]
     public async Task<IActionResult> Index()
     {
         var documentos = await _context.Documentos
@@ -38,13 +46,25 @@ public class DocumentosController : Controller
     }
 
     // GET /Documentos/Create
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
     public IActionResult Create() => View(new DocumentoFormViewModel());
 
     // POST /Documentos/Create
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(DocumentoFormViewModel model)
     {
+        if (model.Archivo is { Length: > 0 })
+        {
+            var ext = Path.GetExtension(model.Archivo.FileName).ToLowerInvariant();
+            if (!_extensionesPermitidas.Contains(ext))
+            {
+                ModelState.AddModelError("Archivo", "Formato no permitido. Solo se aceptan PDF, DOCX, DOC y XLSX.");
+            }
+        }
+
         if (!ModelState.IsValid) return View(model);
 
         var userId = _userManager.GetUserId(User)!;
@@ -54,7 +74,7 @@ public class DocumentosController : Controller
         {
             Titulo = model.Titulo,
             Version = model.Version,
-            Estado = EstadoHelper.Normalizar(model.EstadoInicial),
+            Estado = "Borrador",
             FechaCreacion = now,
             FechaModificacion = now,
             Categoria = model.Categoria,
@@ -75,14 +95,16 @@ public class DocumentosController : Controller
             UsuarioId = userId,
             Accion = "Creó",
             Fecha = now,
-            Detalle = $"Documento creado en estado {EstadoHelper.ToLabel(doc.Estado)}"
+            Detalle = $"Documento '{doc.Titulo}' creado como Borrador"
         });
         await _context.SaveChangesAsync();
 
-        return RedirectToAction(nameof(Details), new { id = doc.Id });
+        TempData["Exito"] = $"Documento '{doc.Titulo}' creado correctamente.";
+        return RedirectToAction(nameof(Index));
     }
 
     // GET /Documentos/Details/5
+    [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
         var doc = await _context.Documentos
@@ -98,10 +120,18 @@ public class DocumentosController : Controller
     }
 
     // GET /Documentos/Edit/5
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int id)
     {
         var doc = await _context.Documentos.FindAsync(id);
         if (doc == null) return NotFound();
+
+        if (doc.Estado is "Aprobado" or "Obsoleto")
+        {
+            TempData["Error"] = $"No se puede editar un documento en estado '{EstadoHelper.ToLabel(doc.Estado)}'.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
 
         var model = new DocumentoFormViewModel
         {
@@ -120,10 +150,19 @@ public class DocumentosController : Controller
 
     // POST /Documentos/Edit/5
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, DocumentoFormViewModel model)
     {
         if (id != model.Id) return BadRequest();
+
+        if (model.Archivo is { Length: > 0 })
+        {
+            var ext = Path.GetExtension(model.Archivo.FileName).ToLowerInvariant();
+            if (!_extensionesPermitidas.Contains(ext))
+                ModelState.AddModelError("Archivo", "Formato no permitido. Solo se aceptan PDF, DOCX, DOC y XLSX.");
+        }
+
         if (!ModelState.IsValid) return View(model);
 
         var doc = await _context.Documentos.FindAsync(id);
@@ -131,6 +170,20 @@ public class DocumentosController : Controller
 
         var userId = _userManager.GetUserId(User)!;
         var versionAnterior = doc.Version;
+
+        if (model.Archivo is { Length: > 0 })
+        {
+            _context.HistorialVersiones.Add(new HistorialVersion
+            {
+                DocumentoId = doc.Id,
+                VersionAnterior = versionAnterior,
+                VersionNueva = model.Version,
+                FechaCambio = DateTime.UtcNow,
+                UsuarioId = userId,
+                Notas = $"Reemplazo de archivo en v{model.Version}"
+            });
+            GuardarArchivo(model.Archivo, doc);
+        }
 
         doc.Titulo = model.Titulo;
         doc.Version = model.Version;
@@ -140,20 +193,7 @@ public class DocumentosController : Controller
         doc.Estado = EstadoHelper.Normalizar(model.EstadoInicial);
         doc.FechaModificacion = DateTime.UtcNow;
 
-        if (model.Archivo is { Length: > 0 })
-            GuardarArchivo(model.Archivo, doc);
-
         _context.Update(doc);
-
-        _context.HistorialVersiones.Add(new HistorialVersion
-        {
-            DocumentoId = doc.Id,
-            VersionAnterior = versionAnterior,
-            VersionNueva = doc.Version,
-            FechaCambio = doc.FechaModificacion,
-            UsuarioId = userId,
-            Notas = model.Descripcion
-        });
 
         _context.Auditorias.Add(new Auditoria
         {
@@ -168,7 +208,42 @@ public class DocumentosController : Controller
         return RedirectToAction(nameof(Details), new { id = doc.Id });
     }
 
+    // POST /Documentos/Delete/5
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var doc = await _context.Documentos.FindAsync(id);
+        if (doc == null) return NotFound();
+
+        if (doc.Estado != "Borrador")
+        {
+            TempData["Error"] = "Solo se pueden eliminar documentos en estado Borrador.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var userId = _userManager.GetUserId(User)!;
+
+        _context.Auditorias.Add(new Auditoria
+        {
+            DocumentoId = doc.Id,
+            UsuarioId = userId,
+            Accion = "Eliminó",
+            Fecha = DateTime.UtcNow,
+            Detalle = $"Documento '{doc.Titulo}' eliminado"
+        });
+        await _context.SaveChangesAsync();
+
+        _context.Documentos.Remove(doc);
+        await _context.SaveChangesAsync();
+
+        TempData["Exito"] = $"Documento '{doc.Titulo}' eliminado.";
+        return RedirectToAction(nameof(Index));
+    }
+
     // GET /Documentos/Approve/5
+    [HttpGet]
     public async Task<IActionResult> Approve(int id)
     {
         var doc = await _context.Documentos
@@ -200,10 +275,10 @@ public class DocumentosController : Controller
 
         var accion = doc.Estado switch
         {
-            "Aprobado"   => "Aprobó",
-            "Borrador"   => "Rechazó",
-            "Obsoleto"   => "Archivó",
-            _            => "Editó"
+            "Aprobado" => "Aprobó",
+            "Borrador"  => "Rechazó",
+            "Obsoleto"  => "Archivó",
+            _           => "Editó"
         };
 
         _context.Auditorias.Add(new Auditoria
@@ -217,10 +292,168 @@ public class DocumentosController : Controller
 
         _context.Update(doc);
         await _context.SaveChangesAsync();
+
+        if (doc.Estado == "Aprobado")
+            await _busqueda.IndexarDocumento(doc);
+
         return RedirectToAction(nameof(Details), new { id = doc.Id });
     }
 
+    // POST /Documentos/EnviarARevision/5
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EnviarARevision(int id)
+    {
+        var doc = await _context.Documentos.FindAsync(id);
+        if (doc == null) return NotFound();
+
+        if (doc.Estado != "Borrador")
+        {
+            TempData["Error"] = "Solo se pueden enviar a revisión documentos en estado Borrador.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var userId = _userManager.GetUserId(User)!;
+        doc.Estado = "EnRevision";
+        doc.FechaModificacion = DateTime.UtcNow;
+
+        _context.Auditorias.Add(new Auditoria
+        {
+            DocumentoId = doc.Id,
+            UsuarioId = userId,
+            Accion = "Envió a revisión",
+            Fecha = doc.FechaModificacion
+        });
+
+        _context.Update(doc);
+        await _context.SaveChangesAsync();
+
+        TempData["Exito"] = $"Documento '{doc.Titulo}' enviado a revisión.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    // GET /Documentos/Aprobar/5
+    [HttpGet]
+    [Authorize(Roles = "Admin,Revisor")]
+    public async Task<IActionResult> Aprobar(int id)
+    {
+        var doc = await _context.Documentos
+            .Include(d => d.Usuario)
+            .FirstOrDefaultAsync(d => d.Id == id);
+        if (doc == null) return NotFound();
+
+        if (doc.Estado != "EnRevision")
+        {
+            TempData["Error"] = "Solo se pueden aprobar documentos en estado En Revisión.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var historial = await _context.Auditorias
+            .Include(a => a.Usuario)
+            .Where(a => a.DocumentoId == id)
+            .OrderBy(a => a.Fecha)
+            .ToListAsync();
+
+        return View("Approve", new ApproveViewModel { Documento = doc, Historial = historial });
+    }
+
+    // POST /Documentos/Aprobar/5
+    [HttpPost]
+    [Authorize(Roles = "Admin,Revisor")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Aprobar(int id, string comentario)
+    {
+        var doc = await _context.Documentos.FindAsync(id);
+        if (doc == null) return NotFound();
+
+        var userId = _userManager.GetUserId(User)!;
+        doc.Estado = "Aprobado";
+        doc.FechaModificacion = DateTime.UtcNow;
+
+        _context.Auditorias.Add(new Auditoria
+        {
+            DocumentoId = doc.Id,
+            UsuarioId = userId,
+            Accion = "Aprobó",
+            Fecha = doc.FechaModificacion,
+            Detalle = comentario
+        });
+
+        _context.Update(doc);
+        await _context.SaveChangesAsync();
+
+        await _busqueda.IndexarDocumento(doc);
+
+        TempData["Exito"] = $"Documento '{doc.Titulo}' aprobado correctamente.";
+        return RedirectToAction(nameof(Index));
+    }
+
+    // POST /Documentos/Rechazar/5
+    [HttpPost]
+    [Authorize(Roles = "Admin,Revisor")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Rechazar(int id, string motivoRechazo)
+    {
+        var doc = await _context.Documentos.FindAsync(id);
+        if (doc == null) return NotFound();
+
+        var userId = _userManager.GetUserId(User)!;
+        doc.Estado = "Borrador";
+        doc.FechaModificacion = DateTime.UtcNow;
+
+        _context.Auditorias.Add(new Auditoria
+        {
+            DocumentoId = doc.Id,
+            UsuarioId = userId,
+            Accion = "Rechazó",
+            Fecha = doc.FechaModificacion,
+            Detalle = motivoRechazo
+        });
+
+        _context.Update(doc);
+        await _context.SaveChangesAsync();
+
+        TempData["Error"] = $"Documento '{doc.Titulo}' rechazado y devuelto a Borrador.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    // POST /Documentos/MarcarObsoleto/5
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MarcarObsoleto(int id)
+    {
+        var doc = await _context.Documentos.FindAsync(id);
+        if (doc == null) return NotFound();
+
+        if (doc.Estado != "Aprobado")
+        {
+            TempData["Error"] = "Solo se pueden marcar como obsoletos documentos en estado Aprobado.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        var userId = _userManager.GetUserId(User)!;
+        doc.Estado = "Obsoleto";
+        doc.FechaModificacion = DateTime.UtcNow;
+
+        _context.Auditorias.Add(new Auditoria
+        {
+            DocumentoId = doc.Id,
+            UsuarioId = userId,
+            Accion = "Marcó como obsoleto",
+            Fecha = doc.FechaModificacion
+        });
+
+        _context.Update(doc);
+        await _context.SaveChangesAsync();
+
+        TempData["Exito"] = $"Documento '{doc.Titulo}' marcado como obsoleto.";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
     // GET /Documentos/Download/5
+    [HttpGet]
     public async Task<IActionResult> Download(int id)
     {
         var doc = await _context.Documentos.FindAsync(id);
@@ -236,8 +469,7 @@ public class DocumentosController : Controller
         });
         await _context.SaveChangesAsync();
 
-        var bytes = await System.IO.File.ReadAllBytesAsync(doc.RutaArchivo);
-        return File(bytes, "application/octet-stream", doc.NombreArchivoOriginal ?? "documento");
+        return PhysicalFile(doc.RutaArchivo, "application/octet-stream", doc.NombreArchivoOriginal ?? "documento");
     }
 
     // ─── helpers ────────────────────────────────────────────────────────────

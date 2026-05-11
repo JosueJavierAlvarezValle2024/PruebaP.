@@ -12,6 +12,8 @@ Construido en ASP.NET Core MVC 10.0 con Entity Framework Core, ASP.NET Core Iden
 | 1 — Frontend visual | ✅ Completo | 16 vistas .cshtml + CSS personalizado, datos ficticios |
 | 2 — Capa de datos | ✅ Completo | EF Core, Identity, DbContext, modelos, migraciones |
 | 3 — Lógica de controladores | ✅ Completo | Controladores reales, ViewModels, helper, BD operativa |
+| 4 — Dashboard con datos reales | ✅ Completo | KPIs reales, DocumentosRecientes, routing por rol, stub Consulta |
+| 5 — Módulo Consulta + correcciones | ✅ Completo | ConsultaController real, sidebar por rol, Login unificado, seguridad |
 
 ---
 
@@ -31,8 +33,9 @@ Construido en ASP.NET Core MVC 10.0 con Entity Framework Core, ASP.NET Core Iden
 ```
 Controllers/
 ├── AccountController.cs       Login, Register, Logout (Identity real)
+├── ConsultaController.cs      Index(q?) + Download(id) para Operario — solo docs Aprobados
 ├── DocumentosController.cs    Index, Create, Details, Edit, Approve, Download
-└── HomeController.cs          Index, Dashboard, Privacy, Error
+└── HomeController.cs          Index, Dashboard (redirect Operario → Consulta), Privacy, Error
 
 Data/
 └── ApplicationDbContext.cs    IdentityDbContext<Usuario>, DbSets, OnModelCreating
@@ -51,7 +54,7 @@ ViewModels/
 ├── RegisterViewModel.cs
 ├── DocumentoFormViewModel.cs  Creación y edición (incluye IFormFile)
 ├── ApproveViewModel.cs        Flujo de aprobación
-└── DashboardViewModel.cs      KPIs + listas para el panel de control
+└── DashboardViewModel.cs      KPIs + ActividadReciente + DocumentosRecientes + PendientesRevision + DocumentosVigentes
 
 Views/
 ├── Shared/
@@ -62,7 +65,9 @@ Views/
 │   ├── Login.cshtml           @model LoginViewModel, asp-for, validación
 │   └── Register.cshtml        @model RegisterViewModel, asp-for, validación
 ├── Home/
-│   └── Dashboard.cshtml       @model DashboardViewModel, KPIs reales, 3 pestañas
+│   └── Dashboard.cshtml       @model DashboardViewModel, KPIs reales, 3 pestañas + tabla DocumentosRecientes
+├── Consulta/
+│   └── Index.cshtml           Búsqueda + tabla docs Aprobados + enlace Módulo PHP
 └── Documentos/
     ├── Index.cshtml            @model IEnumerable<Documento>
     ├── Create.cshtml           @model DocumentoFormViewModel
@@ -131,6 +136,8 @@ Auditorias
 | `/Documentos/Edit/{id}` | GET / POST | Editar, genera nueva versión automática |
 | `/Documentos/Approve/{id}` | GET / POST | Flujo de aprobación + auditoría |
 | `/Documentos/Download/{id}` | GET | Descarga archivo, registra auditoría |
+| `/Consulta` | GET | Lista docs Aprobados con búsqueda `[Authorize(Roles="Operario")]` |
+| `/Consulta/Download/{id}` | GET | Descarga doc Aprobado + auditoría `[Authorize(Roles="Operario")]` |
 
 ---
 
@@ -204,3 +211,95 @@ dotnet ef database update
 La BD `NormaDocDB` en LocalDB contiene:
 - Tablas de Identity: `AspNetUsers`, `AspNetRoles`, `AspNetUserRoles`, etc.
 - Tablas del dominio: `Documentos`, `HistorialVersiones`, `Auditorias`
+
+---
+
+## Fase 4 — Dashboard con datos reales (última sesión)
+
+Se completó la conexión del Dashboard con SQL Server y se agregó routing por rol.
+
+### Cambios realizados
+
+**`ViewModels/DashboardViewModel.cs`**
+- Agregada propiedad `List<Documento> DocumentosRecientes` (últimos 5 docs por `FechaCreacion` desc, todos los estados)
+
+**`Controllers/HomeController.cs`**
+- Al inicio de `Dashboard()`: si `usuario.Rol == "Operario"` → `RedirectToAction("Index", "Consulta")`
+- Nueva query LINQ: últimos 5 documentos de cualquier estado ordenados por `FechaCreacion` desc, con `Include(d => d.Usuario)`
+- Propiedad `DocumentosRecientes = recientes` asignada al ViewModel
+
+**`Views/Home/Dashboard.cshtml`**
+- Pestaña Admin: agregada tabla "Documentos Recientes" debajo de la tabla de actividad
+- La tabla itera sobre `@Model.DocumentosRecientes` mostrando Título (enlace a Details), Versión, Estado (badge), Autor, Fecha de creación
+- Si la lista está vacía muestra mensaje `"Sin documentos registrados."`
+
+**`Controllers/ConsultaController.cs`** *(nuevo)*
+- Stub con `[Authorize(Roles = "Operario")]`
+- Acción `Index()` devuelve la vista placeholder
+
+**`Views/Consulta/Index.cshtml`** *(nuevo)*
+- Vista con `_Layout.cshtml`, mensaje "Módulo en desarrollo", botón para volver al inicio
+- Pendiente de reemplazar en Prompt B6
+
+### Comportamiento por rol tras esta fase
+
+| Rol | Comportamiento en `/Home/Dashboard` |
+|-----|--------------------------------------|
+| Admin | Ve KPIs reales + actividad reciente + documentos recientes |
+| Revisor | Ve KPIs reales + documentos pendientes de revisión |
+| Operario | Redirigido automáticamente a `/Consulta/Index` |
+
+---
+
+## Fase 5 — Módulo Consulta + correcciones de seguridad y UX
+
+### Módulo de Consulta para Operarios (Prompt B6)
+
+**`Controllers/ConsultaController.cs`** *(reemplazado stub)*
+- DI: `ApplicationDbContext`, `UserManager<Usuario>`, `IConfiguration`
+- `Index(string? q)`: query solo Estado == "Aprobado", filtro `Titulo.Contains(q)` si q no es vacío, orden por `FechaModificacion` desc. Pasa `ViewBag.Q` y `ViewBag.ModuloConsultaUrl`
+- `Download(int id)`: busca doc, verifica `Estado == "Aprobado"` (Forbid si no), registra auditoría "Descargó", retorna `PhysicalFile`
+- Clase: `[Authorize(Roles = "Operario")]`
+
+**`Views/Consulta/Index.cshtml`** *(reemplazado placeholder)*
+- Barra de búsqueda: `<form method="get">` con input `name="q"` y botón "Limpiar" condicional
+- Tabla: Título | Versión | Fecha Aprobación | Extensión | Acción (botón Descargar)
+- Estado vacío: "No hay documentos vigentes disponibles."
+- Enlace al módulo PHP: `<a href="@ViewBag.ModuloConsultaUrl">Ver portal de consulta pública →</a>` en `card-footer`
+
+**`appsettings.json`**
+- Agregada clave `"ModuloConsulta": { "Url": "http://localhost:8080" }`
+
+### Correcciones de seguridad y UX
+
+**`Views/Shared/_Layout.cshtml`**
+- "Documentos" en sidebar: oculto a Operarios (`@if (User.IsInRole("Admin") || User.IsInRole("Revisor"))`)
+- "Usuarios" en sidebar: oculto a todos salvo Admin (`@if (User.IsInRole("Admin"))`)
+- Sección "Gestión" completa oculta a Operarios
+- Badge de notificaciones hardcodeado `3` eliminado del topbar
+
+**`Views/Account/Login.cshtml`**
+- Eliminado link "¿No tienes cuenta? Regístrate" que causaba loop para usuarios sin rol Admin
+
+**`Controllers/AccountController.cs`**
+- Login POST simplificado: todos los roles redirigen a `Dashboard` tras autenticarse
+- Eliminada la redirección diferenciada a ModuloPHP para Operarios (el Dashboard ya maneja el redirect a Consulta)
+
+### Comportamiento final por rol
+
+| Rol | Flujo tras login |
+|-----|-----------------|
+| Admin | Login → Dashboard (KPIs + actividad + docs recientes) |
+| Revisor | Login → Dashboard (KPIs + pendientes de revisión) |
+| Operario | Login → Dashboard → redirect automático a `/Consulta/Index` |
+
+### Sidebar visible según rol
+
+| Sección | Admin | Revisor | Operario |
+|---------|-------|---------|----------|
+| Dashboard | ✅ | ✅ | ✅ |
+| Documentos | ✅ | ✅ | ❌ |
+| Usuarios | ✅ | ❌ | ❌ |
+| Reportes | ✅ | ✅ | ❌ |
+| Configuración | ✅ | ✅ | ✅ |
+| Cerrar sesión | ✅ | ✅ | ✅ |

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Prueba3._0.Models;
@@ -9,11 +10,13 @@ public class AccountController : Controller
 {
     private readonly UserManager<Usuario> _userManager;
     private readonly SignInManager<Usuario> _signInManager;
+    private readonly IConfiguration _configuration;
 
-    public AccountController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager)
+    public AccountController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager, IConfiguration configuration)
     {
-        _userManager = userManager;
+        _userManager   = userManager;
         _signInManager = signInManager;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -41,14 +44,11 @@ public class AccountController : Controller
     }
 
     [HttpGet]
-    public IActionResult Register()
-    {
-        if (User.Identity?.IsAuthenticated == true)
-            return RedirectToAction("Dashboard", "Home");
-        return View(new RegisterViewModel());
-    }
+    [Authorize(Roles = "Admin")]
+    public IActionResult Register() => View(new RegisterViewModel());
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
@@ -56,18 +56,19 @@ public class AccountController : Controller
 
         var user = new Usuario
         {
-            UserName = model.Email,
-            Email = model.Email,
-            Nombre = model.FullName,
-            Rol = model.Role,
+            UserName      = model.Email,
+            Email         = model.Email,
+            Nombre        = model.Nombre,
+            Rol           = model.Rol,
             FechaCreacion = DateTime.UtcNow
         };
 
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            return RedirectToAction("Dashboard", "Home");
+            await _userManager.AddToRoleAsync(user, model.Rol);
+            TempData["Exito"] = $"Usuario {model.Nombre} creado correctamente.";
+            return RedirectToAction("Index", "Usuarios");
         }
 
         foreach (var error in result.Errors)

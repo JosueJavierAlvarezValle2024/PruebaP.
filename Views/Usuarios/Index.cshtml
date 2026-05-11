@@ -1,0 +1,81 @@
+@model IEnumerable<Prueba3._0.Models.Usuario>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Usuarios";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/documentos.css" asp-append-version="true" />
+}
+
+@* ===== ENCABEZADO ===== *@
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="page-title mb-0">Usuarios del Sistema</h1>
+        <p class="page-subtitle mb-0">Gestiona los usuarios registrados en NormaDoc</p>
+    </div>
+    <a asp-action="Register" asp-controller="Account" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i> Nuevo Usuario
+    </a>
+</div>
+
+@* ===== MENSAJE DE ÉXITO ===== *@
+@if (TempData["Exito"] != null)
+{
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-4" role="alert">
+        <i class="bi bi-check-circle-fill flex-shrink-0"></i>
+        <span>@TempData["Exito"]</span>
+    </div>
+}
+
+@* ===== TABLA DE USUARIOS ===== *@
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-people me-2"></i> Listado de Usuarios
+        <span class="badge bg-secondary ms-2">@Model.Count()</span>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Correo</th>
+                        <th>Rol</th>
+                        <th>Fecha de registro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No hay usuarios registrados.</td>
+                        </tr>
+                    }
+                    @foreach (var u in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="user-chip">@EstadoHelper.Iniciales(u.Nombre)</span>
+                                @u.Nombre
+                            </td>
+                            <td>@u.Email</td>
+                            <td>
+                                @{
+                                    var rolClass = u.Rol switch {
+                                        "Admin"    => "bg-primary",
+                                        "Revisor"  => "bg-warning text-dark",
+                                        "Operario" => "bg-secondary",
+                                        _          => "bg-light text-dark"
+                                    };
+                                }
+                                <span class="badge @rolClass">@u.Rol</span>
+                            </td>
+                            <td>@u.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

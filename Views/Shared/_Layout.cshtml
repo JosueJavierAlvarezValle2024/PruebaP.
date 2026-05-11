@@ -28,13 +28,16 @@
         <div class="topbar-right">
             <button class="topbar-icon-btn" type="button" aria-label="Notificaciones">
                 <i class="bi bi-bell"></i>
-                <span class="notification-badge">3</span>
             </button>
+            @{
+                var _displayName = User.Identity?.Name ?? "Usuario";
+                var _userRole    = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+            }
             <div class="topbar-user">
-                <div class="user-avatar">JP</div>
+                <div class="user-avatar">@EstadoHelper.Iniciales(_displayName)</div>
                 <div class="user-info">
-                    <span class="user-name">Juan Pérez</span>
-                    <span class="user-role">Admin</span>
+                    <span class="user-name">@_displayName</span>
+                    <span class="user-role">@_userRole</span>
                 </div>
             </div>
         </div>
@@ -52,30 +55,38 @@
                     <span class="sidebar-section-title">Navegación</span>
                     <ul class="sidebar-menu">
                         <li class="sidebar-item">
-                            <a href="/" class="sidebar-link">
+                            <a asp-action="Dashboard" asp-controller="Home" class="sidebar-link">
                                 <i class="bi bi-speedometer2"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Revisor"))
+                        {
                         <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">
+                            <a asp-action="Index" asp-controller="Documentos" class="sidebar-link">
                                 <i class="bi bi-file-earmark-text"></i>
                                 <span>Documentos</span>
                             </a>
                         </li>
+                        }
                     </ul>
                 </div>
 
                 @* Sección GESTIÓN *@
+                @if (User.IsInRole("Admin") || User.IsInRole("Revisor"))
+                {
                 <div class="sidebar-section">
                     <span class="sidebar-section-title">Gestión</span>
                     <ul class="sidebar-menu">
+                        @if (User.IsInRole("Admin"))
+                        {
                         <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">
+                            <a asp-action="Index" asp-controller="Usuarios" class="sidebar-link">
                                 <i class="bi bi-people"></i>
                                 <span>Usuarios</span>
                             </a>
                         </li>
+                        }
                         <li class="sidebar-item">
                             <a href="#" class="sidebar-link">
                                 <i class="bi bi-bar-chart-line"></i>
@@ -84,6 +95,7 @@
                         </li>
                     </ul>
                 </div>
+                }
 
                 @* Sección SISTEMA *@
                 <div class="sidebar-section">
@@ -94,6 +106,15 @@
                                 <i class="bi bi-gear"></i>
                                 <span>Configuración</span>
                             </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <form asp-action="Logout" asp-controller="Account" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="sidebar-link btn-link-sidebar">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span>Cerrar sesión</span>
+                                </button>
+                            </form>
                         </li>
                     </ul>
                 </div>

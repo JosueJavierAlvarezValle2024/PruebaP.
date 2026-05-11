@@ -33,6 +33,9 @@ public class HomeController : Controller
     {
         var usuario = await _userManager.GetUserAsync(User);
 
+        if (usuario?.Rol == "Operario")
+            return RedirectToAction("Index", "Consulta");
+
         var cultura = new CultureInfo("es-ES");
         var fechaHoy = DateTime.Now.ToString("dddd, d 'de' MMMM 'de' yyyy", cultura);
         fechaHoy = char.ToUpper(fechaHoy[0]) + fechaHoy[1..];
@@ -64,6 +67,12 @@ public class HomeController : Controller
             .Take(10)
             .ToListAsync();
 
+        var recientes = await _context.Documentos
+            .Include(d => d.Usuario)
+            .OrderByDescending(d => d.FechaCreacion)
+            .Take(5)
+            .ToListAsync();
+
         var vm = new DashboardViewModel
         {
             NombreUsuario    = usuario?.Nombre ?? User.Identity?.Name ?? "Usuario",
@@ -75,6 +84,7 @@ public class HomeController : Controller
             Obsoletos        = obsoletos,
             Borradores       = borradores,
             ActividadReciente = actividad,
+            DocumentosRecientes = recientes,
             PendientesRevision = pendientes,
             DocumentosVigentes = vigentes
         };
